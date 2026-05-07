@@ -3,6 +3,7 @@
 #include <QMainWindow>
 #include <QHash>
 #include <QJsonArray>
+#include <QJsonObject>
 #include <QDateTime>
 #include "ShowConfig.h"
 #include "cybershow/common/ScreenDefinition.h"
@@ -16,6 +17,7 @@ class QProgressBar;
 class QPropertyAnimation;
 class QStackedWidget;
 class QListWidget;
+class QListWidgetItem;
 class QTextEdit;
 class QLabel;
 class QPushButton;
@@ -74,6 +76,10 @@ private:
     QString getLocalIpAddress() const;
     void processTrafficEvent(const QByteArray& rawLine, const QJsonObject& obj);
     void processDeviceEvent(const QJsonObject& obj);
+    void applyDeviceSnapshot(const QJsonArray& devices);
+    QListWidgetItem* findDeviceItem(const QString& mac, const QString& ip) const;
+    QListWidgetItem* applyDeviceInventoryItem(const QJsonObject& obj, bool connected);
+    QString deviceInventoryDisplayName(const QJsonObject& obj) const;
     void processCredentialEvent(const QString& name, const QString& email);
     void updateStatsView();
     void updateNavigationHeader();
@@ -85,7 +91,7 @@ private:
     void setBottomNavVisible(bool visible);
     void resetEncryptionScreen();
     void triggerEncryptionScreen();
-    void beginEncryptionPlayback();
+    void beginEncryptionPlayback(const QString& targetIp = QString(), const QString& domain = QString());
 
 private slots:
     void startRouterScripts();
@@ -132,6 +138,7 @@ private:
     QProcess* m_sshProc2 = nullptr;
     QProcess* m_sshProc3 = nullptr;
     QProcess* m_sshProc4 = nullptr;
+    QProcess* m_sshProc5 = nullptr;
     QProcess* m_sniffProc = nullptr;
 
     void startSshConsole(QProcess*& proc, QTextEdit* console, const QString& command);
@@ -161,8 +168,8 @@ private:
     QStringList m_encryptionPlaybackLines;
     int m_encryptionPlaybackLine = 0;
     int m_encryptionPlaybackChar = 0;
+    QDateTime m_encryptionArmedAt;
     
-    void startEncryptionDemo();
     void updateEncryptionAnimation();
     QString generateHexPayload(int lines);
 

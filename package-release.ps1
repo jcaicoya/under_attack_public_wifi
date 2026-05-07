@@ -51,6 +51,7 @@ if (Test-Path $staging) { Remove-Item $staging -Recurse -Force }
 New-Item -ItemType Directory "$staging\plugins\platforms"   | Out-Null
 New-Item -ItemType Directory "$staging\plugins\multimedia"  | Out-Null
 New-Item -ItemType Directory "$staging\resources"           | Out-Null
+New-Item -ItemType Directory "$staging\scripts"             | Out-Null
 
 $out = Join-Path $buildDir "Release"
 Copy-Item "$out\public_wifi.exe"                                    $staging
@@ -64,6 +65,7 @@ Copy-Item "$out\plugins\platforms\qwindows.dll"                     "$staging\pl
 Copy-Item "$out\plugins\multimedia\windowsmediaplugin.dll"          "$staging\plugins\multimedia\"
 Copy-Item "$root\resources\regions.json"                            "$staging\resources\"
 Copy-Item "$root\resources\services.json"                           "$staging\resources\"
+Copy-Item "$root\scripts\*.sh"                                      "$staging\scripts\"
 Copy-Item "$root\RUNBOOK.md"                                        $staging
 
 # --- Zip ---

@@ -21,6 +21,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonValue>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
@@ -37,6 +38,7 @@
 #include <QStringList>
 #include <QTextEdit>
 #include <QScrollBar>
+#include <QSet>
 #include <QTcpSocket>
 #include <QTimer>
 #include <QVBoxLayout>
@@ -59,6 +61,10 @@
 
 namespace
 {
+constexpr int kDeviceMacRole = Qt::UserRole + 1;
+constexpr int kDeviceSignalRole = Qt::UserRole + 2;
+constexpr int kDeviceSourceRole = Qt::UserRole + 3;
+
 QRect availableGeometryForConfig(const ShowConfig& config)
 {
     const auto screens = QApplication::screens();
@@ -410,6 +416,7 @@ MainWindow::~MainWindow()
     if (m_sshProc2) { m_sshProc2->kill(); m_sshProc2->waitForFinished(); }
     if (m_sshProc3) { m_sshProc3->kill(); m_sshProc3->waitForFinished(); }
     if (m_sshProc4) { m_sshProc4->kill(); m_sshProc4->waitForFinished(); }
+    if (m_sshProc5) { m_sshProc5->kill(); m_sshProc5->waitForFinished(); }
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event)
@@ -435,7 +442,6 @@ void MainWindow::processTrafficEvent(const QByteArray& rawLine, const QJsonObjec
 {
     qDebug() << "[TRAFFIC]" << obj;
 
-    const QString device = obj.value("device").toString().trimmed();
     const QString event = obj.value("event").toString().trimmed();
     const QString domain = obj.value("domain").toString().trimmed();
     const QString ip = obj.value("ip").toString().trimmed();
@@ -469,37 +475,6 @@ void MainWindow::processTrafficEvent(const QByteArray& rawLine, const QJsonObjec
         appendConsole(m_console2,
             QString("[%1] %2 -&gt; %3 [<font color='%4'><b>%5</b></font>]")
             .arg(ts, ip, domain, color, event));
-    }
-
-    // Poblar lista de devices también desde tráfico
-    if (m_devicesListB && !ip.isEmpty()) {
-        QListWidgetItem* foundItem = nullptr;
-
-        for (int i = 0; i < m_devicesListB->count(); ++i) {
-            QListWidgetItem* item = m_devicesListB->item(i);
-            if (item && item->toolTip() == ip) {
-                foundItem = item;
-                break;
-            }
-        }
-
-        if (!foundItem) {
-            // New IP discovered via traffic
-            QString displayName = device.isEmpty() ? ip : device;
-            auto* item = new QListWidgetItem(displayName);
-            item->setToolTip(ip);
-            m_devicesListB->addItem(item);
-            foundItem = item;
-            qDebug() << "Device discovered from traffic (IP lookup):" << displayName << ip;
-
-            if (m_devicesListB->count() == 1) {
-                m_devicesListB->setCurrentItem(item);
-            }
-        } else if (!device.isEmpty() && foundItem->text() == ip) {
-            // Update IP name if it was previously just an IP
-            foundItem->setText(device);
-        }
-        updateControlStatusPanel();
     }
 
     // En C mostramos solo el tráfico del device seleccionado
@@ -546,68 +521,245 @@ void MainWindow::processTrafficEvent(const QByteArray& rawLine, const QJsonObjec
         }
         updateStatsView();
     }
+
+    QString selectedIpForEncryption;
+    const bool hasSelectedDeviceForEncryption = m_devicesListB && m_devicesListB->currentItem();
+    if (hasSelectedDeviceForEncryption) {
+        selectedIpForEncryption = m_devicesListB->currentItem()->toolTip();
+    }
+
+    const bool isWhatsAppEvent =
+        event == QStringLiteral("WHATSAPP")
+        || domain.contains(QStringLiteral("whatsapp"), Qt::CaseInsensitive)
+        || domain.contains(QStringLiteral("wa.me"), Qt::CaseInsensitive);
+    const bool isAfterEncryptionArmDelay =
+        !m_encryptionArmedAt.isValid()
+        || QDateTime::currentDateTime() >= m_encryptionArmedAt;
+
+    if (isWhatsAppEvent
+        && m_stack
+        && m_stack->currentIndex() == static_cast<int>(PageId::Encryption)
+        && m_encryptionTimer
+        && isAfterEncryptionArmDelay
+        && !m_encryptionTimer->isActive()
+        && (!m_lockedPlaceholderE || !m_lockedPlaceholderE->isVisible())) {
+        if (!hasSelectedDeviceForEncryption
+            || selectedIpForEncryption.isEmpty()
+            || selectedIpForEncryption == ip) {
+            beginEncryptionPlayback(ip, domain);
+        }
+    }
+}
+
+QString MainWindow::deviceInventoryDisplayName(const QJsonObject& obj) const
+{
+    QString name = obj.value(QStringLiteral("name")).toString().trimmed();
+    if (name.isEmpty()) {
+        name = obj.value(QStringLiteral("device")).toString().trimmed();
+    }
+
+    const QString ip = obj.value(QStringLiteral("ip")).toString().trimmed();
+    const QString mac = obj.value(QStringLiteral("mac")).toString().trimmed();
+
+    if (name == QStringLiteral("*")
+        || name.compare(QStringLiteral("WhatsApp"), Qt::CaseInsensitive) == 0
+        || name.compare(obj.value(QStringLiteral("event")).toString(), Qt::CaseInsensitive) == 0) {
+        name.clear();
+    }
+
+    if (!name.isEmpty()) {
+        return name;
+    }
+    if (!ip.isEmpty()) {
+        return ip;
+    }
+    if (!mac.isEmpty()) {
+        return mac;
+    }
+    return QStringLiteral("Dispositivo");
+}
+
+QListWidgetItem* MainWindow::findDeviceItem(const QString& mac, const QString& ip) const
+{
+    if (!m_devicesListB) {
+        return nullptr;
+    }
+
+    for (int i = 0; i < m_devicesListB->count(); ++i) {
+        auto* item = m_devicesListB->item(i);
+        if (!item) {
+            continue;
+        }
+
+        if (!mac.isEmpty()
+            && item->data(kDeviceMacRole).toString().compare(mac, Qt::CaseInsensitive) == 0) {
+            return item;
+        }
+
+        if (!ip.isEmpty() && item->toolTip() == ip) {
+            return item;
+        }
+    }
+
+    return nullptr;
+}
+
+QListWidgetItem* MainWindow::applyDeviceInventoryItem(const QJsonObject& obj, bool connected)
+{
+    if (!m_devicesListB) {
+        return nullptr;
+    }
+
+    const QString mac = obj.value(QStringLiteral("mac")).toString().trimmed().toUpper();
+    const QString ip = obj.value(QStringLiteral("ip")).toString().trimmed();
+    const QString source = obj.value(QStringLiteral("source")).toString().trimmed();
+    const bool hideFromDeviceList = !ip.isEmpty() && ip == getLocalIpAddress();
+    const QString displayName = deviceInventoryDisplayName(obj);
+    QString explicitName = obj.value(QStringLiteral("name")).toString().trimmed();
+    if (explicitName.isEmpty()) {
+        explicitName = obj.value(QStringLiteral("device")).toString().trimmed();
+    }
+    if (explicitName == QStringLiteral("*")
+        || explicitName.compare(QStringLiteral("WhatsApp"), Qt::CaseInsensitive) == 0
+        || explicitName.compare(obj.value(QStringLiteral("event")).toString(), Qt::CaseInsensitive) == 0) {
+        explicitName.clear();
+    }
+
+    if (mac.isEmpty() && ip.isEmpty() && displayName == QStringLiteral("Dispositivo")) {
+        return nullptr;
+    }
+
+    QListWidgetItem* item = findDeviceItem(mac, ip);
+    if (!item) {
+        item = new QListWidgetItem(displayName);
+        m_devicesListB->addItem(item);
+    } else if (!explicitName.isEmpty()
+               || item->text().isEmpty()
+               || item->text() == item->toolTip()
+               || item->text().compare(item->data(kDeviceMacRole).toString(), Qt::CaseInsensitive) == 0
+               || item->text().compare(QStringLiteral("WhatsApp"), Qt::CaseInsensitive) == 0) {
+        item->setText(displayName);
+    }
+
+    if (!ip.isEmpty()) {
+        item->setToolTip(ip);
+    }
+    if (!mac.isEmpty()) {
+        item->setData(kDeviceMacRole, mac);
+    }
+    if (!source.isEmpty()) {
+        item->setData(kDeviceSourceRole, source);
+    }
+    if (obj.contains(QStringLiteral("signal")) && !obj.value(QStringLiteral("signal")).isNull()) {
+        item->setData(kDeviceSignalRole, obj.value(QStringLiteral("signal")).toInt());
+    }
+    item->setHidden(hideFromDeviceList);
+
+    if (connected) {
+        item->setForeground(Qt::black);
+        item->setBackground(Qt::green);
+    } else {
+        item->setForeground(Qt::darkGray);
+        item->setBackground(Qt::lightGray);
+    }
+
+    if (!hideFromDeviceList && m_devicesListB->count() == 1 && !m_devicesListB->currentItem()) {
+        m_devicesListB->setCurrentItem(item);
+    }
+
+    if (m_devicesListB->currentItem() == item) {
+        updateNavigationHeader();
+        updateStatsView();
+    }
+
+    return item;
+}
+
+void MainWindow::applyDeviceSnapshot(const QJsonArray& devices)
+{
+    if (!m_devicesListB) {
+        return;
+    }
+
+    QSet<QString> seenKeys;
+    for (const QJsonValue& value : devices) {
+        if (!value.isObject()) {
+            continue;
+        }
+
+        const QJsonObject device = value.toObject();
+        QListWidgetItem* item = applyDeviceInventoryItem(device, true);
+        if (!item) {
+            continue;
+        }
+
+        const QString mac = item->data(kDeviceMacRole).toString().toUpper();
+        const QString ip = item->toolTip();
+        if (!mac.isEmpty()) {
+            seenKeys.insert(QStringLiteral("mac:%1").arg(mac));
+        } else if (!ip.isEmpty()) {
+            seenKeys.insert(QStringLiteral("ip:%1").arg(ip));
+        }
+    }
+
+    for (int i = 0; i < m_devicesListB->count(); ++i) {
+        auto* item = m_devicesListB->item(i);
+        if (!item) {
+            continue;
+        }
+
+        const QString mac = item->data(kDeviceMacRole).toString().toUpper();
+        const QString ip = item->toolTip();
+        const QString key = !mac.isEmpty() ? QStringLiteral("mac:%1").arg(mac)
+                                           : QStringLiteral("ip:%1").arg(ip);
+        if (!key.endsWith(QStringLiteral(":")) && !seenKeys.contains(key)) {
+            item->setForeground(Qt::darkGray);
+            item->setBackground(Qt::lightGray);
+        }
+    }
+
+    QListWidgetItem* firstVisibleItem = nullptr;
+    for (int i = 0; i < m_devicesListB->count(); ++i) {
+        auto* item = m_devicesListB->item(i);
+        if (item && !item->isHidden()) {
+            firstVisibleItem = item;
+            break;
+        }
+    }
+
+    if (!m_devicesListB->currentItem() || m_devicesListB->currentItem()->isHidden()) {
+        if (firstVisibleItem) {
+            m_devicesListB->setCurrentItem(firstVisibleItem);
+        } else {
+            m_devicesListB->setCurrentRow(-1);
+        }
+    }
+
+    updateControlStatusPanel();
 }
 
 void MainWindow::processDeviceEvent(const QJsonObject& obj)
 {
     qDebug() << "[DEVICE]" << obj;
 
-    const QString device = obj.value("device").toString().trimmed();
     const QString action = obj.value("action").toString().trimmed();
-    const QString ip = obj.value("ip").toString().trimmed();
-    const QString mac = obj.value("mac").toString().trimmed();
 
-    if (!m_devicesListB || (device.isEmpty() && ip.isEmpty())) {
+    if (action == QStringLiteral("snapshot")) {
+        applyDeviceSnapshot(obj.value(QStringLiteral("devices")).toArray());
         return;
     }
 
     QListWidgetItem* foundItem = nullptr;
-    for (int i = 0; i < m_devicesListB->count(); ++i) {
-        QListWidgetItem* item = m_devicesListB->item(i);
-        // Robust lookup by IP (stored in tooltip)
-        if (item && item->toolTip() == ip) {
-            foundItem = item;
-            break;
-        }
-    }
-
-    if (action == "connected") {
-        if (m_stack && m_stack->currentIndex() == static_cast<int>(PageId::Devices)) {
+    if (action == QStringLiteral("connected") || action == QStringLiteral("updated")) {
+        if (action == QStringLiteral("connected")
+            && m_stack
+            && m_stack->currentIndex() == static_cast<int>(PageId::Devices)) {
             playTone(this, 880.0f, 160); // crisp A5 ping — new device on network
         }
-        if (!foundItem) {
-            QString displayName = device.isEmpty() ? ip : device;
-            auto* item = new QListWidgetItem(displayName);
-            item->setToolTip(ip);
-            if (!mac.isEmpty()) {
-                item->setData(Qt::UserRole + 1, mac);
-            }
-            m_devicesListB->addItem(item);
-            foundItem = item;
-            qDebug() << "Device added from device event (IP lookup):" << displayName << ip;
-        } else {
-            if (!device.isEmpty()) {
-                foundItem->setText(device); // Update name if it changed or was previously just an IP
-            }
-            if (!mac.isEmpty()) {
-                foundItem->setData(Qt::UserRole + 1, mac);
-            }
-        }
-
-        if (foundItem) {
-            foundItem->setForeground(Qt::black);
-            foundItem->setBackground(Qt::green);
-        }
-
-        if (m_devicesListB->count() == 1 && !m_devicesListB->currentItem()) {
-            m_devicesListB->setCurrentItem(foundItem);
-        }
+        foundItem = applyDeviceInventoryItem(obj, true);
     }
-    else if (action == "disconnected") {
-        if (foundItem) {
-            foundItem->setForeground(Qt::darkGray);
-            foundItem->setBackground(Qt::lightGray);
-        }
+    else if (action == QStringLiteral("disconnected")) {
+        foundItem = applyDeviceInventoryItem(obj, false);
     }
     
     // Update Navigation header if the currently selected device was updated
@@ -621,7 +773,7 @@ void MainWindow::processDeviceEvent(const QJsonObject& obj)
         const QString sign = (action == "connected") ? "+" : "-";
         appendConsole(m_console1,
             QString("[%1] %2  %-16s  %3  %4")
-            .arg(ts).arg(sign).arg(device).arg(ip).arg(action));
+            .arg(ts).arg(sign).arg(deviceInventoryDisplayName(obj)).arg(obj.value(QStringLiteral("ip")).toString()).arg(action));
     }
 }
 
@@ -1088,80 +1240,54 @@ QString MainWindow::generateHexPayload(int lines)
     return payload;
 }
 
-void MainWindow::startEncryptionDemo()
+void MainWindow::beginEncryptionPlayback(const QString& targetIp, const QString& domain)
 {
+    if (!m_hackerTerminalE || !m_lockedPlaceholderE || !m_encryptionTimer) {
+        return;
+    }
+
+    if (m_sniffProc) {
+        m_sniffProc->kill();
+        m_sniffProc->waitForFinished();
+        m_sniffProc->deleteLater();
+        m_sniffProc = nullptr;
+    }
+
+    m_encryptionTimer->stop();
     m_lockedPlaceholderE->hide();
     m_hackerTerminalE->clear();
     m_encryptionPlaybackLines.clear();
     m_encryptionPlaybackLine = 0;
     m_encryptionPlaybackChar = 0;
 
-    QString targetIp;
-    if (m_devicesListB && m_devicesListB->currentItem()) {
-        targetIp = m_devicesListB->currentItem()->toolTip();
+    QString observedIp = targetIp;
+    if (observedIp.isEmpty() && m_devicesListB && m_devicesListB->currentItem()) {
+        observedIp = m_devicesListB->currentItem()->toolTip();
     }
 
-    if (m_config.mode == ShowConfig::Mode::Demo) {
-        const QStringList matrixLines = generateHexPayload(15).trimmed().split('\n');
-        m_encryptionPlaybackLines << "> INICIANDO ANALISIS DE PAQUETES CIFRADOS ..."
-                                  << "> Paquete observado..."
-                                  << "> Extrayendo carga binaria..."
-                                  << "";
-        m_encryptionPlaybackLines.append(matrixLines);
-        m_encryptionPlaybackLines << ""
-                                  << "> Carga capturada..."
-                                  << "> Iniciando simulacion...";
-        m_encryptionStep = -1;
-        m_bruteForceTick = 0;
-        m_encryptionTimer->start(50);
-        return;
-    }
+    const bool looksLikeWhatsApp =
+        domain.contains(QStringLiteral("whatsapp"), Qt::CaseInsensitive)
+        || domain.contains(QStringLiteral("wa.me"), Qt::CaseInsensitive);
+    const QString observedDomain = domain.isEmpty() ? QStringLiteral("trafico cifrado del objetivo") : domain;
+    const QString observedSignal = looksLikeWhatsApp
+        ? QStringLiteral("MENSAJERIA CIFRADA DETECTADA")
+        : QStringLiteral("TRAFICO CIFRADO DEL OBJETIVO DETECTADO");
+    const QStringList matrixLines = generateHexPayload(15).trimmed().split('\n');
 
-    m_encryptionStep = 0;
+    m_encryptionPlaybackLines << QString("> %1").arg(observedSignal)
+                              << QString("> Objetivo: %1").arg(observedIp.isEmpty() ? QStringLiteral("sin IP seleccionada") : observedIp)
+                              << QString("> Senal observada: %1").arg(observedDomain)
+                              << "> Extrayendo carga binaria..."
+                              << "";
+    m_encryptionPlaybackLines.append(matrixLines);
+    m_encryptionPlaybackLines << ""
+                              << "> Carga capturada. El contenido es ilegible: cifrado activo."
+                              << "> Iniciando simulacion de ruptura...";
+
+    m_encryptionStep = -1;
     m_bruteForceTick = 0;
-    m_encryptionTimer->start(50);
-
-    if (targetIp.isEmpty()) {
-        m_hackerTerminalE->append("> ERROR: no hay dispositivo objetivo seleccionado.");
-        m_hackerTerminalE->append("> Seleccione un dispositivo en la pantalla 2 primero.");
-        m_encryptionTimer->stop();
-        return;
-    }
-
-    m_hackerTerminalE->append(QString("> Observando trafico en tiempo real para IP: %1").arg(targetIp));
-    m_hackerTerminalE->append("> Filtro: puerto 443 (HTTPS) / 5222 (WhatsApp)");
-    m_hackerTerminalE->append("> ESPERANDO DATOS DEL OBJETIVO...\n");
-
-    if (m_sniffProc) {
-        m_sniffProc->kill();
-        m_sniffProc->waitForFinished();
-        m_sniffProc->deleteLater();
-    }
-
-    m_sniffProc = new QProcess(this);
-    connect(m_sniffProc, &QProcess::readyReadStandardOutput, this, [this]() {
-        QString output = QString::fromUtf8(m_sniffProc->readAllStandardOutput());
-        m_hackerTerminalE->append(output);
-        m_hackerTerminalE->verticalScrollBar()->setValue(m_hackerTerminalE->verticalScrollBar()->maximum());
-    });
-
-    connect(m_sniffProc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this](int exitCode, QProcess::ExitStatus exitStatus) {
-        if (exitStatus == QProcess::NormalExit && exitCode == 0) {
-            m_hackerTerminalE->append("\n> Captura completada.");
-            m_hackerTerminalE->append("> Carga capturada. El contenido es ilegible: cifrado activo.");
-            m_hackerTerminalE->append("> Inicializando simulacion de fuerza bruta...");
-
-            m_encryptionStep = 0;
-            m_bruteForceTick = 0;
-            m_encryptionTimer->start(50);
-        } else {
-            m_hackerTerminalE->append("\n> Captura cancelada o agotada por tiempo.");
-        }
-        });
-
-    QStringList args;
-    args << "root@192.168.8.1" << QString("/root/sniff_payload.sh %1").arg(targetIp);
-    m_sniffProc->start("ssh", args);
+    m_encryptionTimer->setInterval(50);
+    m_encryptionTimer->start();
 }
 
 void MainWindow::resetEncryptionScreen()
@@ -1176,18 +1302,16 @@ void MainWindow::resetEncryptionScreen()
     m_encryptionPlaybackLines.clear();
     m_encryptionPlaybackLine = 0;
     m_encryptionPlaybackChar = 0;
-    m_hackerTerminalE->clear();
     m_lockedPlaceholderE->hide();
+    m_encryptionArmedAt = QDateTime::currentDateTime().addMSecs(2500);
+    m_hackerTerminalE->setPlainText(
+        "> Esperando senal de mensajeria cifrada del objetivo seleccionado...\n"
+        "> Preparando filtro de WhatsApp...");
 }
 
 void MainWindow::triggerEncryptionScreen()
 {
-    if (m_config.mode == ShowConfig::Mode::Demo) {
-        startEncryptionDemo();
-        return;
-    }
-
-    startEncryptionDemo();
+    beginEncryptionPlayback();
 }
 
 void MainWindow::updateEncryptionAnimation()
@@ -1465,7 +1589,7 @@ void MainWindow::updateNavigationHeader()
     if (m_devicesListB && m_devicesListB->currentItem()) {
         selectedIp = m_devicesListB->currentItem()->toolTip();
         selectedName = m_devicesListB->currentItem()->text();
-        selectedMac = m_devicesListB->currentItem()->data(Qt::UserRole + 1).toString();
+        selectedMac = m_devicesListB->currentItem()->data(kDeviceMacRole).toString();
     }
 
     if (selectedIp.isEmpty()) {
@@ -1516,10 +1640,14 @@ void MainWindow::updateControlStatusPanel()
     int knownDevices = 0;
     int connectedDevices = 0;
     if (m_devicesListB) {
-        knownDevices = m_devicesListB->count();
         for (int i = 0; i < m_devicesListB->count(); ++i) {
             const auto* item = m_devicesListB->item(i);
-            if (item && item->background().color() == QColor(Qt::green)) {
+            if (!item || item->isHidden()) {
+                continue;
+            }
+
+            ++knownDevices;
+            if (item->background().color() == QColor(Qt::green)) {
                 ++connectedDevices;
             }
         }
@@ -1819,18 +1947,19 @@ void MainWindow::startRouterScripts()
     QString localIp = getLocalIpAddress();
     
     // Kill any detached background zombies from previous sessions or manual runs first
-    QProcess::execute("ssh", QStringList() << "root@192.168.8.1" << "killall send_traffic_events.sh device_watch.sh");
+    QProcess::execute("ssh", QStringList() << "root@192.168.8.1" << "killall send_traffic_events.sh device_watch.sh whatsapp_watch.sh");
     
     if (m_console1) m_console1->clear();
     if (m_console2) m_console2->clear();
     if (m_console3) m_console3->clear();
     if (m_console4) m_console4->clear();
 
-    // Start 4 live SSH monitoring streams
+    // Start live SSH monitoring streams
     startSshConsole(m_sshProc1, m_console1, QString("/root/device_watch.sh %1 5556").arg(localIp));
     startSshConsole(m_sshProc2, m_console2, QString("/root/send_traffic_events.sh %1 5555").arg(localIp));
     startSshConsole(m_sshProc3, m_console3, "logread -f");
     startSshConsole(m_sshProc4, m_console4, "top -d 2");
+    startSshConsole(m_sshProc5, m_console2, QString("/root/whatsapp_watch.sh %1 5555").arg(localIp));
     
     statusBar()->showMessage(QString("Sent start command to router scripts. (IP: %1)").arg(localIp), 3000);
     updateControlStatusPanel();
@@ -1842,8 +1971,9 @@ void MainWindow::stopRouterScripts()
     if (m_sshProc2) m_sshProc2->kill();
     if (m_sshProc3) m_sshProc3->kill();
     if (m_sshProc4) m_sshProc4->kill();
+    if (m_sshProc5) m_sshProc5->kill();
 
-    QString cmd = "killall send_traffic_events.sh device_watch.sh";
+    QString cmd = "killall send_traffic_events.sh device_watch.sh whatsapp_watch.sh";
     QStringList args;
     args << "root@192.168.8.1" << cmd;
     

@@ -17,7 +17,8 @@ find_package(Qt6 COMPONENTS
         Svg
         REQUIRED)
 
-add_executable(public_wifi src/main.cpp
+add_executable(public_wifi WIN32
+        src/main.cpp
         src/ShowConfig.h
         src/cybershow/common/CyberAppMode.h
         src/cybershow/common/CyberAppMode.cpp
