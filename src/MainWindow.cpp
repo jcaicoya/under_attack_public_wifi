@@ -771,7 +771,7 @@ QString MainWindow::deviceInventoryDisplayName(const QJsonObject& obj) const
         return name;
     }
 
-    // Use vendor as a human-readable fallback before falling back to the raw IP
+    // Vendor as fallback when no hostname is available
     const QString vendor = obj.value(QStringLiteral("vendor")).toString().trimmed();
     if (!vendor.isEmpty()) {
         if (!ip.isEmpty())
@@ -779,12 +779,14 @@ QString MainWindow::deviceInventoryDisplayName(const QJsonObject& obj) const
         return vendor;
     }
 
-    if (!ip.isEmpty()) {
-        return ip;
-    }
+    // Generate a stable alias from the MAC so we never display a bare IP as the name.
+    // Devices without a hostname and without a recognized OUI are typically using
+    // MAC randomization (iOS/Android privacy feature).
     if (!mac.isEmpty()) {
-        return mac;
+        const QString suffix = QString(mac).remove(':').right(4).toUpper();
+        return QStringLiteral("Mobile-") + suffix;
     }
+
     return QStringLiteral("Dispositivo");
 }
 
