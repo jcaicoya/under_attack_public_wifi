@@ -17,7 +17,7 @@ find_package(Qt6 COMPONENTS
         Svg
         REQUIRED)
 
-add_executable(public_wifi WIN32
+add_executable(public_wifi
         src/main.cpp
         src/ShowConfig.h
         src/cybershow/common/CyberAppMode.h
@@ -65,6 +65,12 @@ target_include_directories(public_wifi PRIVATE
         src/cybershow/common
         src/cybershow/ui
 )
+
+# Hide the console window in Release builds; keep it in Debug so CLion can stop the process.
+if(WIN32)
+    set_target_properties(public_wifi PROPERTIES
+        WIN32_EXECUTABLE "$<CONFIG:Release,RelWithDebInfo>")
+endif()
 
 add_subdirectory(tools/polygon-editor)
 add_subdirectory(tools/service-mapper)
