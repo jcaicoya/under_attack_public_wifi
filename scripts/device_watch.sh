@@ -68,6 +68,13 @@ get_wifi_records() {
     done | sort -u
 }
 
+resolve_vendor() {
+    MAC="$1"
+    OUI="$(printf '%s' "$MAC" | tr -d ':' | cut -c1-6 | tr 'a-f' 'A-F')"
+    [ -z "$OUI" ] && return
+    grep -m1 "^${OUI}	" /root/oui.txt 2>/dev/null | cut -f2
+}
+
 resolve_dhcp() {
     MAC="$1"
     awk -v mac="$MAC" '
@@ -153,14 +160,15 @@ record_json() {
     ip_json="$(json_escape "$ip")"
     name_json="$(json_escape "$name")"
     source_json="$(json_escape "$source")"
+    vendor_json="$(json_escape "$(resolve_vendor "$mac")")"
 
     case "$signal" in
         -[0-9]*|[0-9]*) signal_json="$signal" ;;
         *) signal_json="null" ;;
     esac
 
-    printf '{"mac":"%s","ip":"%s","name":"%s","device":"%s","signal":%s,"source":"%s","connected":true}' \
-        "$mac_json" "$ip_json" "$name_json" "$name_json" "$signal_json" "$source_json"
+    printf '{"mac":"%s","ip":"%s","name":"%s","device":"%s","vendor":"%s","signal":%s,"source":"%s","connected":true}' \
+        "$mac_json" "$ip_json" "$name_json" "$name_json" "$vendor_json" "$signal_json" "$source_json"
 }
 
 send_json() {
@@ -200,14 +208,15 @@ send_change_event() {
     ip_json="$(json_escape "$ip")"
     name_json="$(json_escape "$name")"
     source_json="$(json_escape "$source")"
+    vendor_json="$(json_escape "$(resolve_vendor "$mac")")"
 
     case "$signal" in
         -[0-9]*|[0-9]*) signal_json="$signal" ;;
         *) signal_json="null" ;;
     esac
 
-    send_json "$(printf '{"type":"device","action":"%s","mac":"%s","ip":"%s","name":"%s","device":"%s","signal":%s,"source":"%s"}' \
-        "$action" "$mac_json" "$ip_json" "$name_json" "$name_json" "$signal_json" "$source_json")"
+    send_json "$(printf '{"type":"device","action":"%s","mac":"%s","ip":"%s","name":"%s","device":"%s","vendor":"%s","signal":%s,"source":"%s"}' \
+        "$action" "$mac_json" "$ip_json" "$name_json" "$name_json" "$vendor_json" "$signal_json" "$source_json")"
 }
 
 find_by_mac() {

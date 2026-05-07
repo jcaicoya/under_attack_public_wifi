@@ -64,6 +64,7 @@ namespace
 constexpr int kDeviceMacRole = Qt::UserRole + 1;
 constexpr int kDeviceSignalRole = Qt::UserRole + 2;
 constexpr int kDeviceSourceRole = Qt::UserRole + 3;
+constexpr int kDeviceVendorRole = Qt::UserRole + 4;
 
 QRect availableGeometryForConfig(const ShowConfig& config)
 {
@@ -769,6 +770,15 @@ QString MainWindow::deviceInventoryDisplayName(const QJsonObject& obj) const
     if (!name.isEmpty()) {
         return name;
     }
+
+    // Use vendor as a human-readable fallback before falling back to the raw IP
+    const QString vendor = obj.value(QStringLiteral("vendor")).toString().trimmed();
+    if (!vendor.isEmpty()) {
+        if (!ip.isEmpty())
+            return vendor + QStringLiteral(" (") + ip + QStringLiteral(")");
+        return vendor;
+    }
+
     if (!ip.isEmpty()) {
         return ip;
     }
@@ -812,6 +822,7 @@ QListWidgetItem* MainWindow::applyDeviceInventoryItem(const QJsonObject& obj, bo
     const QString mac = obj.value(QStringLiteral("mac")).toString().trimmed().toUpper();
     const QString ip = obj.value(QStringLiteral("ip")).toString().trimmed();
     const QString source = obj.value(QStringLiteral("source")).toString().trimmed();
+    const QString vendor = obj.value(QStringLiteral("vendor")).toString().trimmed();
     const bool hideFromDeviceList = !ip.isEmpty() && ip == getLocalIpAddress();
     const QString displayName = deviceInventoryDisplayName(obj);
     QString explicitName = obj.value(QStringLiteral("name")).toString().trimmed();
@@ -848,6 +859,9 @@ QListWidgetItem* MainWindow::applyDeviceInventoryItem(const QJsonObject& obj, bo
     }
     if (!source.isEmpty()) {
         item->setData(kDeviceSourceRole, source);
+    }
+    if (!vendor.isEmpty()) {
+        item->setData(kDeviceVendorRole, vendor);
     }
     if (obj.contains(QStringLiteral("signal")) && !obj.value(QStringLiteral("signal")).isNull()) {
         item->setData(kDeviceSignalRole, obj.value(QStringLiteral("signal")).toInt());

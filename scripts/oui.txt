@@ -1,0 +1,274 @@
+# OUI vendor table — first 3 octets of MAC, uppercase, no separators, tab-separated
+# Format: AABBCC<TAB>Vendor Name
+# Source: IEEE public OUI registry (curated subset for consumer devices)
+
+# Apple
+001124	Apple
+001451	Apple
+001CB3	Apple
+001D4F	Apple
+001E52	Apple
+001F5B	Apple
+002312	Apple
+0025BC	Apple
+0026B9	Apple
+00264A	Apple
+003065	Apple
+3C0754	Apple
+3CA382	Apple
+4865EE	Apple
+54AE27	Apple
+5C96D7	Apple
+5CF938	Apple
+686718	Apple
+6CC26B	Apple
+706F81	Apple
+7C11BE	Apple
+7CF05F	Apple
+84789C	Apple
+8C7B9D	Apple
+90FD61	Apple
+98F0AB	Apple
+A45E60	Apple
+A4C3F0	Apple
+AC3C0B	Apple
+ACBC32	Apple
+BCF5AC	Apple
+C86C87	Apple
+D0C5F3	Apple
+DC9B9C	Apple
+E4E43D	Apple
+F0189B	Apple
+F45C89	Apple
+FC253F	Apple
+
+# Samsung
+001599	Samsung
+0015B9	Samsung
+001D25	Samsung
+001EE3	Samsung
+002339	Samsung
+0024E9	Samsung
+00268B	Samsung
+002722	Samsung
+2C4D54	Samsung
+306540	Samsung
+34149B	Samsung
+3C6200	Samsung
+484ABD	Samsung
+4CEDFB	Samsung
+5417F3	Samsung
+5C2E59	Samsung
+5CF28F	Samsung
+5C4973	Samsung
+748D08	Samsung
+8C71F8	Samsung
+8CB54B	Samsung
+9CA3A9	Samsung
+98ECA0	Samsung
+ACEE9E	Samsung
+B4EF39	Samsung
+BC44B0	Samsung
+CC07AB	Samsung
+D4BF7F	Samsung
+D8C4E9	Samsung
+E4607E	Samsung
+E8E5D6	Samsung
+F08177	Samsung
+F4428B	Samsung
+FC1A11	Samsung
+FC7CF5	Samsung
+
+# Huawei
+001E10	Huawei
+0026CF	Huawei
+086361	Huawei
+0C37DC	Huawei
+1CB72C	Huawei
+202BC1	Huawei
+2C9EFF	Huawei
+344BED	Huawei
+3C6200	Huawei
+4C8B5B	Huawei
+5C4CA9	Huawei
+68A0F6	Huawei
+7CD1C3	Huawei
+8C34FD	Huawei
+90E7C4	Huawei
+A08D16	Huawei
+BC7574	Huawei
+C8D15E	Huawei
+CCB0DA	Huawei
+E4672D	Huawei
+E89860	Huawei
+FC4819	Huawei
+
+# Xiaomi
+28EAF1	Xiaomi
+284FD7	Xiaomi
+4C4992	Xiaomi
+50EC50	Xiaomi
+58DDAC	Xiaomi
+5C84B1	Xiaomi
+641CB0	Xiaomi
+7CC355	Xiaomi
+8897DF	Xiaomi
+9C99A0	Xiaomi
+A05804	Xiaomi
+B4C3F4	Xiaomi
+D4970B	Xiaomi
+E4D0AE	Xiaomi
+EC63D7	Xiaomi
+F0B429	Xiaomi
+FC64BA	Xiaomi
+
+# Google / Pixel
+3C5AB4	Google
+5401B8	Google
+A47733	Google
+C479A4	Google
+F88FCA	Google
+
+# OnePlus / OPPO
+1C7B21	OPPO
+2C5BB8	OPPO
+443F62	OPPO
+547399	OPPO
+60D2B5	OPPO
+785B30	OPPO
+84CD12	OPPO
+AC2341	OnePlus
+E4D07E	OnePlus
+
+# Microsoft / Surface
+001DD8	Microsoft
+002264	Microsoft
+28187A	Microsoft
+485073	Microsoft
+7C1E52	Microsoft
+885D90	Microsoft
+DC5362	Microsoft
+
+# Intel (laptop Wi-Fi cards)
+001F3B	Intel
+002186	Intel
+00219B	Intel
+0021CC	Intel
+0022FA	Intel
+002355	Intel
+4C3488	Intel
+4CE173	Intel
+5C864A	Intel
+60673E	Intel
+6CB8DB	Intel
+8C8D28	Intel
+8C45CE	Intel
+A0A8CD	Intel
+B4B680	Intel
+C0CBC9	Intel
+D46D6D	Intel
+DC4A3E	Intel
+EC0E2C	Intel
+
+# Dell
+001372	Dell
+001A4B	Dell
+14FEB5	Dell
+18DB5C	Dell
+3C2AF6	Dell
+54449F	Dell
+68F728	Dell
+848D8F	Dell
+B083FE	Dell
+F0272D	Dell
+
+# Lenovo / ThinkPad
+002564	Lenovo
+002600	Lenovo
+288058	Lenovo
+3C1975	Lenovo
+484BA4	Lenovo
+7036D5	Lenovo
+88706D	Lenovo
+9CBA10	Lenovo
+B42E9F	Lenovo
+D07AB5	Lenovo
+
+# HP
+00145E	HP
+001EC9	HP
+001F29	HP
+18177B	HP
+244BFE	HP
+3C4A92	HP
+686CE0	HP
+78480A	HP
+B499BA	HP
+C8D3FF	HP
+
+# Asus
+001731	Asus
+0011D8	Asus
+001832	Asus
+001A92	Asus
+001D60	Asus
+001E8C	Asus
+2C56DC	Asus
+38D547	Asus
+4CE676	Asus
+74D02B	Asus
+9C5C8E	Asus
+BC9740	Asus
+D850E6	Asus
+E03F49	Asus
+
+# Sony Mobile
+001412	Sony
+0C7582	Sony
+4C2C68	Sony
+5C5187	Sony
+74E517	Sony
+9862B6	Sony
+A8BE27	Sony
+C0EFB5	Sony
+E89BEE	Sony
+
+# Amazon (Echo, Fire, Kindle)
+0C47C9	Amazon
+40B4CD	Amazon
+44650D	Amazon
+4063E3	Amazon
+747548	Amazon
+A002DC	Amazon
+B47C9C	Amazon
+FC65DE	Amazon
+
+# Apple Watch / Fitbit / Garmin (wearables)
+5C31AD	Fitbit
+D4AEA2	Fitbit
+002B6A	Garmin
+2CBE08	Garmin
+54D2EF	Garmin
+489E24	Fossil
+
+# Nintendo
+00040F	Nintendo
+001656	Nintendo
+001F32	Nintendo
+002709	Nintendo
+8C56C5	Nintendo
+A4C0E1	Nintendo
+CCFB65	Nintendo
+
+# Raspberry Pi
+B827EB	Raspberry Pi
+DCA632	Raspberry Pi
+E45F01	Raspberry Pi
+
+# TP-Link
+001EE5	TP-Link
+14CC20	TP-Link
+50C7BF	TP-Link
+8CFABA	TP-Link
+C025A2	TP-Link
+E894F6	TP-Link
