@@ -182,10 +182,13 @@ static void showMainWindow(MainWindow& window, const ShowConfig& config)
         }
         window.show();
     } else {
-        if (!available.isEmpty()) {
-            window.setGeometry(available);
+        const auto screens = QGuiApplication::screens();
+        if (config.screenIndex >= 0 && config.screenIndex < screens.size()) {
+            window.move(screens.at(config.screenIndex)->geometry().topLeft());
+        } else if (!available.isEmpty()) {
+            window.move(available.topLeft());
         }
-        window.showMaximized();
+        window.showFullScreen();
     }
 }
 

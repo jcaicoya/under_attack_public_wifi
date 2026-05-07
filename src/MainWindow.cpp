@@ -1538,6 +1538,13 @@ bool MainWindow::handleRuntimeKeyPress(QKeyEvent* event)
     case Qt::Key_F10:
         setModeWatermarkVisible(!m_modeWatermarkVisible);
         return true;
+    case Qt::Key_F11:
+        if (isFullScreen()) {
+            showMaximized();
+        } else {
+            showFullScreen();
+        }
+        return true;
     default:
         break;
     }
