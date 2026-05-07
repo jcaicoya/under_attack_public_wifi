@@ -542,7 +542,7 @@ MainWindow::MainWindow(const ShowConfig& config, QWidget* parent)
         if (m_console1) m_console1->setPlainText(
             QString("[%1] device_watch.sh started\n[%1] Listening for DHCP/arp events...").arg(t));
         if (m_console2) m_console2->setPlainText(
-            QString("[%1] send_traffic_events.sh started\n[%1] Listening on port 5555...").arg(t));
+            QString("[%1] traffic_watch.sh started\n[%1] Listening on port 5555...").arg(t));
         if (m_console3) m_console3->setPlainText(
             QString("[%1] GL-MT300N-V2 OpenWrt 23.05.3\n[%1] System ready.").arg(t));
         if (m_console4) m_console4->setPlainText(
@@ -604,7 +604,6 @@ MainWindow::~MainWindow()
     if (m_sshProc2) { m_sshProc2->kill(); m_sshProc2->waitForFinished(); }
     if (m_sshProc3) { m_sshProc3->kill(); m_sshProc3->waitForFinished(); }
     if (m_sshProc4) { m_sshProc4->kill(); m_sshProc4->waitForFinished(); }
-    if (m_sshProc5) { m_sshProc5->kill(); m_sshProc5->waitForFinished(); }
 }
 
 bool MainWindow::eventFilter(QObject* watched, QEvent* event)
@@ -2169,7 +2168,7 @@ void MainWindow::startRouterScripts()
     QString localIp = getLocalIpAddress();
     
     // Kill any detached background zombies from previous sessions or manual runs first
-    QProcess::execute("ssh", QStringList() << "root@192.168.8.1" << "killall send_traffic_events.sh device_watch.sh whatsapp_watch.sh");
+    QProcess::execute("ssh", QStringList() << "root@192.168.8.1" << "killall traffic_watch.sh device_watch.sh");
     
     if (m_console1) m_console1->clear();
     if (m_console2) m_console2->clear();
@@ -2178,10 +2177,9 @@ void MainWindow::startRouterScripts()
 
     // Start live SSH monitoring streams
     startSshConsole(m_sshProc1, m_console1, QString("/root/device_watch.sh %1 5556").arg(localIp));
-    startSshConsole(m_sshProc2, m_console2, QString("/root/send_traffic_events.sh %1 5555").arg(localIp));
+    startSshConsole(m_sshProc2, m_console2, QString("/root/traffic_watch.sh %1 5555").arg(localIp));
     startSshConsole(m_sshProc3, m_console3, "logread -f");
     startSshConsole(m_sshProc4, m_console4, "top -d 2");
-    startSshConsole(m_sshProc5, m_console2, QString("/root/whatsapp_watch.sh %1 5555").arg(localIp));
     
     statusBar()->showMessage(QString("Sent start command to router scripts. (IP: %1)").arg(localIp), 3000);
     updateControlStatusPanel();
@@ -2193,9 +2191,8 @@ void MainWindow::stopRouterScripts()
     if (m_sshProc2) m_sshProc2->kill();
     if (m_sshProc3) m_sshProc3->kill();
     if (m_sshProc4) m_sshProc4->kill();
-    if (m_sshProc5) m_sshProc5->kill();
 
-    QString cmd = "killall send_traffic_events.sh device_watch.sh whatsapp_watch.sh";
+    QString cmd = "killall traffic_watch.sh device_watch.sh";
     QStringList args;
     args << "root@192.168.8.1" << cmd;
     

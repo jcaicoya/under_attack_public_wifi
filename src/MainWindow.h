@@ -138,7 +138,6 @@ private:
     QProcess* m_sshProc2 = nullptr;
     QProcess* m_sshProc3 = nullptr;
     QProcess* m_sshProc4 = nullptr;
-    QProcess* m_sshProc5 = nullptr;
     QProcess* m_sniffProc = nullptr;
 
     void startSshConsole(QProcess*& proc, QTextEdit* console, const QString& command);

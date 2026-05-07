@@ -156,21 +156,20 @@ ssh root@192.168.8.1
 Desde el router se pueden lanzar los scripts de eventos. Sustituir `<IP_DEL_PORTATIL>` por la IP `192.168.8.x` que haya mostrado `ipconfig`:
 
 ```bash
-/root/send_traffic_events.sh <IP_DEL_PORTATIL> 5555
 /root/device_watch.sh <IP_DEL_PORTATIL> 5556
-/root/whatsapp_watch.sh <IP_DEL_PORTATIL> 5555
+/root/traffic_watch.sh <IP_DEL_PORTATIL> 5555
 ```
 
 Si se ha actualizado una release, copiar primero los scripts incluidos en `scripts/` al router:
 
 ```powershell
 scp -O .\scripts\device_watch.sh root@192.168.8.1:/root/device_watch.sh
-scp -O .\scripts\send_traffic_events.sh root@192.168.8.1:/root/send_traffic_events.sh
+scp -O .\scripts\traffic_watch.sh root@192.168.8.1:/root/traffic_watch.sh
 scp -O .\scripts\cybershow_events.awk root@192.168.8.1:/root/cybershow_events.awk
 scp -O .\scripts\oui.txt root@192.168.8.1:/root/oui.txt
 scp -O .\scripts\sniff_payload.sh root@192.168.8.1:/root/sniff_payload.sh
-scp -O .\scripts\whatsapp_watch.sh root@192.168.8.1:/root/whatsapp_watch.sh
-ssh root@192.168.8.1 "chmod +x /root/device_watch.sh /root/send_traffic_events.sh /root/sniff_payload.sh /root/whatsapp_watch.sh"
+ssh root@192.168.8.1 "chmod +x /root/device_watch.sh /root/traffic_watch.sh /root/sniff_payload.sh"
+ssh root@192.168.8.1 "rm -f /root/send_traffic_events.sh /root/whatsapp_watch.sh /root/cybershow_events_v3_json.awk"
 ```
 
 Y, si hace falta, observar la actividad del sistema:
