@@ -66,6 +66,8 @@ Copy-Item "$out\plugins\multimedia\windowsmediaplugin.dll"          "$staging\pl
 Copy-Item "$root\resources\regions.json"                            "$staging\resources\"
 Copy-Item "$root\resources\services.json"                           "$staging\resources\"
 Copy-Item "$root\scripts\*.sh"                                      "$staging\scripts\"
+Copy-Item "$root\scripts\*.awk"                                     "$staging\scripts\"
+Copy-Item "$root\scripts\oui.txt"                                   "$staging\scripts\"
 Copy-Item "$root\RUNBOOK.md"                                        $staging
 
 # --- Zip ---
