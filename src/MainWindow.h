@@ -185,4 +185,7 @@ private:
     
     // Stats
     QHash<QString, DeviceStats> m_deviceStats;
+
+    // Traffic cooldown: key = "ip|service", value = ms timestamp of last emit
+    QHash<QString, qint64> m_trafficCooldown;
 };

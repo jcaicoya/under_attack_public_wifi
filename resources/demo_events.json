@@ -1,75 +1,75 @@
 [
   {"type":"device", "action":"connected",    "device":"DemoPhone",    "ip":"192.168.8.100"},
 
-  {"ts":1001, "device":"DemoPhone", "ip":"192.168.8.100", "event":"SEARCH",    "domain":"google.com"},
-  {"ts":1002, "device":"DemoPhone", "ip":"192.168.8.100", "event":"WHATSAPP",  "domain":"whatsapp.net"},
-  {"ts":1003, "device":"DemoPhone", "ip":"192.168.8.100", "event":"AMAZON",    "domain":"amazon.es"},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"google.com",      "ts":1001},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"whatsapp.net",    "ts":1002},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"amazon.es",       "ts":1003},
 
   {"type":"device", "action":"connected",    "device":"iPhone 13",    "ip":"192.168.8.101"},
 
-  {"ts":1004, "device":"DemoPhone", "ip":"192.168.8.100", "event":"VIDEO",     "domain":"youtube.com"},
-  {"ts":1005, "device":"DemoPhone", "ip":"192.168.8.100", "event":"APPLE",     "domain":"icloud.com"},
-  {"ts":1006, "device":"DemoPhone", "ip":"192.168.8.100", "event":"MICROSOFT", "domain":"outlook.com"},
-  {"ts":1007, "device":"DemoPhone", "ip":"192.168.8.100", "event":"SOCIAL",    "domain":"instagram.com"},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"youtube.com",     "ts":1004},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"icloud.com",      "ts":1005},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"outlook.com",     "ts":1006},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"instagram.com",   "ts":1007},
 
   {"type":"device", "action":"connected",    "device":"Samsung S24",  "ip":"192.168.8.102"},
 
-  {"ts":1008, "device":"DemoPhone", "ip":"192.168.8.100", "event":"MAPS",      "domain":"maps.googleapis.com"},
-  {"ts":1009, "device":"DemoPhone", "ip":"192.168.8.100", "event":"EMAIL",     "domain":"gmail.com"},
-  {"ts":1010, "device":"DemoPhone", "ip":"192.168.8.100", "event":"BANKING",   "domain":"santander.com"},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"here.com",        "ts":1008},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"gmail.com",       "ts":1009},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"santander.com",   "ts":1010},
   {"type":"credential", "name":"Maria García", "email":"maria@gmail.com"},
-  {"ts":1011, "device":"DemoPhone", "ip":"192.168.8.100", "event":"STREAMING", "domain":"netflix.com"},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"netflix.com",     "ts":1011},
 
   {"type":"device", "action":"disconnected", "device":"iPhone 13",    "ip":"192.168.8.101"},
 
-  {"ts":1012, "device":"DemoPhone", "ip":"192.168.8.100", "event":"GAMING",    "domain":"steampowered.com"},
-  {"ts":1013, "device":"DemoPhone", "ip":"192.168.8.100", "event":"NEWS",      "domain":"bbc.com"},
-  {"ts":1014, "device":"DemoPhone", "ip":"192.168.8.100", "event":"VPN",       "domain":"nordvpn.com"},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"steampowered.com","ts":1012},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"bbc.com",         "ts":1013},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"nordvpn.com",     "ts":1014},
 
   {"type":"device", "action":"connected",    "device":"MacBook Pro",  "ip":"192.168.8.103"},
 
-  {"ts":1015, "device":"DemoPhone", "ip":"192.168.8.100", "event":"TELEMETRY", "domain":"firebase.google.com"},
-  {"ts":1016, "device":"DemoPhone", "ip":"192.168.8.100", "event":"REGIONAL",  "domain":"aljazeera.com"},
-  {"ts":1017, "device":"DemoPhone", "ip":"192.168.8.100", "event":"LATAM",     "domain":"mercadolibre.com"},
-  {"ts":1018, "device":"DemoPhone", "ip":"192.168.8.100", "event":"PACIFIC",   "domain":"cloudfront.amazonaws.com"},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"amplitude.com",   "ts":1015},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"aljazeera.com",   "ts":1016},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"mercadolibre.com","ts":1017},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"smh.com.au",      "ts":1018},
 
   {"type":"device", "action":"disconnected", "device":"Samsung S24",  "ip":"192.168.8.102"},
 
-  {"ts":1019, "device":"DemoPhone", "ip":"192.168.8.100", "event":"SHOPPING",  "domain":"alibaba.com"},
-  {"ts":1020, "device":"DemoPhone", "ip":"192.168.8.100", "event":"CDN",       "domain":"cloudflare.com"},
-  {"ts":1021, "device":"DemoPhone", "ip":"192.168.8.100", "event":"SEARCH",    "domain":"google.es"},
-  {"ts":1022, "device":"DemoPhone", "ip":"192.168.8.100", "event":"WHATSAPP",  "domain":"wa.me"},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"alibaba.com",     "ts":1019},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"cloudflare.com",  "ts":1020},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"google.es",       "ts":1021},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"wa.me",           "ts":1022},
 
   {"type":"device", "action":"connected",    "device":"Laptop Win11", "ip":"192.168.8.104"},
 
-  {"ts":1023, "device":"DemoPhone", "ip":"192.168.8.100", "event":"VIDEO",     "domain":"tiktok.com"},
-  {"ts":1024, "device":"DemoPhone", "ip":"192.168.8.100", "event":"SOCIAL",    "domain":"facebook.com"},
-  {"ts":1025, "device":"DemoPhone", "ip":"192.168.8.100", "event":"AMAZON",    "domain":"aws.amazon.com"},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"tiktok.com",      "ts":1023},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"facebook.com",    "ts":1024},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"aws.amazon.com",  "ts":1025},
 
   {"type":"device", "action":"disconnected", "device":"MacBook Pro",  "ip":"192.168.8.103"},
 
-  {"ts":1026, "device":"DemoPhone", "ip":"192.168.8.100", "event":"APPLE",     "domain":"apple.com"},
-  {"ts":1027, "device":"DemoPhone", "ip":"192.168.8.100", "event":"MICROSOFT", "domain":"azure.com"},
-  {"ts":1028, "device":"DemoPhone", "ip":"192.168.8.100", "event":"GAMING",    "domain":"epicgames.com"},
-  {"ts":1029, "device":"DemoPhone", "ip":"192.168.8.100", "event":"STREAMING", "domain":"spotify.com"},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"apple.com",       "ts":1026},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"azure.com",       "ts":1027},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"epicgames.com",   "ts":1028},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"spotify.com",     "ts":1029},
 
   {"type":"device", "action":"connected",    "device":"iPhone 13",    "ip":"192.168.8.101"},
 
-  {"ts":1030, "device":"DemoPhone", "ip":"192.168.8.100", "event":"EMAIL",     "domain":"hotmail.com"},
-  {"ts":1031, "device":"DemoPhone", "ip":"192.168.8.100", "event":"BANKING",   "domain":"bbva.com"},
-  {"ts":1032, "device":"DemoPhone", "ip":"192.168.8.100", "event":"VPN",       "domain":"expressvpn.com"},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"hotmail.com",     "ts":1030},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"bbva.com",        "ts":1031},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"expressvpn.com",  "ts":1032},
 
   {"type":"device", "action":"disconnected", "device":"Laptop Win11", "ip":"192.168.8.104"},
 
-  {"ts":1033, "device":"DemoPhone", "ip":"192.168.8.100", "event":"NEWS",      "domain":"reuters.com"},
-  {"ts":1034, "device":"DemoPhone", "ip":"192.168.8.100", "event":"TELEMETRY", "domain":"crashlytics.com"},
-  {"ts":1035, "device":"DemoPhone", "ip":"192.168.8.100", "event":"MAPS",      "domain":"waze.com"},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"reuters.com",     "ts":1033},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"crashlytics.com", "ts":1034},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"waze.com",        "ts":1035},
 
   {"type":"device", "action":"disconnected", "device":"iPhone 13",    "ip":"192.168.8.101"},
 
-  {"ts":1036, "device":"DemoPhone", "ip":"192.168.8.100", "event":"REGIONAL",  "domain":"arabnews.com"},
-  {"ts":1037, "device":"DemoPhone", "ip":"192.168.8.100", "event":"LATAM",     "domain":"globo.com"},
-  {"ts":1038, "device":"DemoPhone", "ip":"192.168.8.100", "event":"PACIFIC",   "domain":"abc.net.au"},
-  {"ts":1039, "device":"DemoPhone", "ip":"192.168.8.100", "event":"SHOPPING",  "domain":"amazon.co.uk"},
-  {"ts":1040, "device":"DemoPhone", "ip":"192.168.8.100", "event":"CDN",       "domain":"akamai.com"}
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"arabnews.com",    "ts":1036},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"globo.com",       "ts":1037},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"abc.net.au",      "ts":1038},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"zalando.es",      "ts":1039},
+  {"type":"traffic", "ip":"192.168.8.100", "domain":"akamai.com",      "ts":1040}
 ]

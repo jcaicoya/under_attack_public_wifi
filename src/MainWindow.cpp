@@ -238,6 +238,193 @@ QString serviceCategoryLabel(const QString& event)
     return kCategories.value(event, "TRAFICO");
 }
 
+static QString baseDomain(const QString& d)
+{
+    QString x = d.toLower().trimmed();
+    if (x.endsWith('.')) x.chop(1);
+
+    const QStringList parts = x.split('.');
+    const int n = parts.size();
+    if (n < 2) return x;
+
+    // Common 2-part second-level ccTLDs — take 3 labels for these
+    static const QSet<QString> kTwoPart = {
+        "com.au", "net.au", "org.au",
+        "co.uk",  "org.uk", "me.uk",
+        "com.br", "net.br",
+        "co.jp",  "ne.jp",
+        "com.ar", "com.mx", "com.co", "com.pe",
+        "co.nz",  "com.sg", "co.za",  "co.in",
+    };
+    if (n >= 3) {
+        const QString last2 = parts[n-2] + '.' + parts[n-1];
+        if (kTwoPart.contains(last2))
+            return parts[n-3] + '.' + last2;
+    }
+    return parts[n-2] + '.' + parts[n-1];
+}
+
+static QString classifyDomain(const QString& d)
+{
+    if (d.isEmpty()) return {};
+
+    // BANKING
+    static const QSet<QString> kBanking = {
+        "santander.com", "bbva.com", "caixabank.com", "bankia.es",
+        "ing.es", "bankinter.com", "sabadell.com",
+        "chase.com", "bankofamerica.com", "wellsfargo.com", "citibank.com",
+        "hsbc.com", "barclays.com", "lloyds.com", "natwest.com",
+        "paypal.com", "stripe.com", "revolut.com", "wise.com", "n26.com", "monzo.com",
+    };
+    if (kBanking.contains(d)) return QStringLiteral("BANKING");
+
+    // WHATSAPP — before EMAIL/SOCIAL
+    if (d == "whatsapp.com" || d == "whatsapp.net" || d == "wa.me"
+        || d.contains("whatsapp"))
+        return QStringLiteral("WHATSAPP");
+
+    // EMAIL
+    static const QSet<QString> kEmail = {
+        "gmail.com", "googlemail.com", "outlook.com", "hotmail.com",
+        "yahoo.com", "protonmail.com", "proton.me",
+        "fastmail.com", "tutanota.com", "zoho.com",
+    };
+    if (kEmail.contains(d)) return QStringLiteral("EMAIL");
+
+    // VIDEO
+    static const QSet<QString> kVideo = {
+        "youtube.com", "youtu.be", "tiktok.com", "vimeo.com",
+        "twitch.tv", "dailymotion.com", "rumble.com",
+    };
+    if (kVideo.contains(d)) return QStringLiteral("VIDEO");
+
+    // STREAMING
+    static const QSet<QString> kStreaming = {
+        "netflix.com", "spotify.com", "hulu.com", "hbomax.com",
+        "disneyplus.com", "primevideo.com",
+        "pandora.com", "soundcloud.com", "deezer.com", "tidal.com",
+        "max.com", "peacocktv.com", "paramountplus.com",
+    };
+    if (kStreaming.contains(d)) return QStringLiteral("STREAMING");
+
+    // SOCIAL
+    static const QSet<QString> kSocial = {
+        "facebook.com", "instagram.com", "twitter.com", "x.com",
+        "threads.net", "linkedin.com", "snapchat.com", "pinterest.com",
+        "reddit.com", "tumblr.com", "discord.com",
+        "telegram.org", "signal.org", "t.me",
+    };
+    if (kSocial.contains(d)) return QStringLiteral("SOCIAL");
+
+    // MAPS
+    static const QSet<QString> kMaps = {
+        "here.com", "waze.com", "tomtom.com",
+        "openstreetmap.org", "mapbox.com",
+    };
+    if (kMaps.contains(d)) return QStringLiteral("MAPS");
+
+    // SEARCH (google.* catch-all)
+    static const QSet<QString> kSearch = {
+        "google.com", "bing.com", "duckduckgo.com",
+        "baidu.com", "yandex.com", "yandex.ru", "ecosia.org",
+        "googleapis.com", "googlevideo.com",
+    };
+    if (kSearch.contains(d) || d.startsWith("google."))
+        return QStringLiteral("SEARCH");
+
+    // APPLE
+    static const QSet<QString> kApple = {
+        "apple.com", "icloud.com", "mzstatic.com",
+    };
+    if (kApple.contains(d) || d.startsWith("apple."))
+        return QStringLiteral("APPLE");
+
+    // MICROSOFT
+    static const QSet<QString> kMicrosoft = {
+        "microsoft.com", "windows.com", "office.com", "azure.com",
+        "onedrive.com", "sharepoint.com", "teams.com", "skype.com",
+        "live.com", "msn.com",
+    };
+    if (kMicrosoft.contains(d) || d.startsWith("microsoft."))
+        return QStringLiteral("MICROSOFT");
+
+    // AMAZON
+    if (d.startsWith("amazon.") || d == "amazonaws.com" || d == "awsstatic.com")
+        return QStringLiteral("AMAZON");
+
+    // SHOPPING
+    static const QSet<QString> kShopping = {
+        "ebay.com", "alibaba.com", "aliexpress.com", "etsy.com",
+        "zalando.es", "zalando.com", "elcorteingles.es",
+        "zara.com", "inditex.com", "shein.com", "wish.com",
+    };
+    if (kShopping.contains(d)) return QStringLiteral("SHOPPING");
+
+    // GAMING
+    static const QSet<QString> kGaming = {
+        "steampowered.com", "epicgames.com", "ea.com",
+        "blizzard.com", "nintendo.com", "playstation.com",
+        "riotgames.com", "valvesoftware.com", "xbox.com",
+        "minecraft.net", "mojang.com",
+    };
+    if (kGaming.contains(d)) return QStringLiteral("GAMING");
+
+    // VPN
+    static const QSet<QString> kVpn = {
+        "nordvpn.com", "expressvpn.com", "surfshark.com", "cyberghost.com",
+        "protonvpn.com", "ipvanish.com", "torproject.org",
+        "mullvad.net", "windscribe.com", "hidemyass.com",
+    };
+    if (kVpn.contains(d)) return QStringLiteral("VPN");
+
+    // NEWS
+    static const QSet<QString> kNews = {
+        "bbc.com", "bbc.co.uk", "cnn.com", "reuters.com",
+        "apnews.com", "theguardian.com", "nytimes.com",
+        "elpais.com", "elmundo.es", "abc.es", "marca.com",
+        "huffpost.com", "dailymail.co.uk",
+    };
+    if (kNews.contains(d)) return QStringLiteral("NEWS");
+
+    // CDN
+    static const QSet<QString> kCdn = {
+        "cloudflare.com", "fastly.com", "akamai.com",
+        "cloudfront.net", "gstatic.com", "akamaized.net",
+    };
+    if (kCdn.contains(d) || d.contains("akamai"))
+        return QStringLiteral("CDN");
+
+    // TELEMETRY
+    static const QSet<QString> kTelemetry = {
+        "amplitude.com", "mixpanel.com", "segment.com", "datadog.com",
+        "newrelic.com", "crashlytics.com", "sentry.io",
+        "appsflyer.com", "adjust.com", "branch.io",
+    };
+    if (kTelemetry.contains(d)) return QStringLiteral("TELEMETRY");
+
+    // LATAM
+    static const QSet<QString> kLatam = {
+        "mercadolibre.com", "globo.com", "uol.com.br",
+        "infobae.com", "clarin.com",
+    };
+    if (kLatam.contains(d)) return QStringLiteral("LATAM");
+
+    // REGIONAL (Middle East / Arab)
+    static const QSet<QString> kRegional = {
+        "aljazeera.com", "arabnews.com", "alarabiya.net",
+    };
+    if (kRegional.contains(d)) return QStringLiteral("REGIONAL");
+
+    // PACIFIC
+    static const QSet<QString> kPacific = {
+        "abc.net.au", "smh.com.au", "theage.com.au", "news.com.au",
+        "nzherald.co.nz", "stuff.co.nz",
+    };
+    if (kPacific.contains(d)) return QStringLiteral("PACIFIC");
+
+    return {};
+}
+
 // Synthesizes and plays a short sine-wave tone through the default audio output.
 // freq: Hz  |  durationMs: total length  |  amplitude: 0.0–1.0
 // Self-cleaning: QAudioSink + QBuffer are parented to `parent` and deleted on idle.
@@ -440,22 +627,34 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 
 void MainWindow::processTrafficEvent(const QByteArray& rawLine, const QJsonObject& obj)
 {
-    qDebug() << "[TRAFFIC]" << obj;
+    Q_UNUSED(rawLine);
 
-    const QString event = obj.value("event").toString().trimmed();
-    const QString domain = obj.value("domain").toString().trimmed();
+    const QString domain = baseDomain(obj.value("domain").toString().trimmed());
     const QString ip = obj.value("ip").toString().trimmed();
+
+    // Prefer an explicit "event" field (legacy/forced); fall back to domain classifier.
+    QString event = obj.value("event").toString().trimmed();
+    if (event.isEmpty())
+        event = classifyDomain(domain);
+    if (event.isEmpty())
+        return;
+
+    // Per-(ip, service) cooldown: suppress repeated events within 6 seconds.
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+    const QString cooldownKey = ip + '|' + event;
+    auto cooldownIt = m_trafficCooldown.find(cooldownKey);
+    if (cooldownIt != m_trafficCooldown.end() && nowMs - cooldownIt.value() < 6000)
+        return;
+    m_trafficCooldown.insert(cooldownKey, nowMs);
 
     if (m_rawTrafficViewB) {
         const QString ts    = QDateTime::currentDateTime().toString("hh:mm:ss");
         const QString color = serviceColor(event);
         const QString category = serviceCategoryLabel(event);
-        const QString line  = event.isEmpty()
-            ? QString::fromUtf8(rawLine).toHtmlEscaped()
-            : QString("<span style='display:inline-block; color:%1; font-weight:800;'>%2</span>"
-                      "&nbsp;<span style='color:#8D96A3;'>[%3]</span>"
-                      "&nbsp;&nbsp;<span style='color:#D8DEE8;'>%4</span>"
-                      "&nbsp;&nbsp;<span style='color:#6F7A88;'>%5</span>")
+        const QString line  = QString("<span style='display:inline-block; color:%1; font-weight:800;'>%2</span>"
+                  "&nbsp;<span style='color:#8D96A3;'>[%3]</span>"
+                  "&nbsp;&nbsp;<span style='color:#D8DEE8;'>%4</span>"
+                  "&nbsp;&nbsp;<span style='color:#6F7A88;'>%5</span>")
               .arg(color,
                    event.toHtmlEscaped(),
                    category.toHtmlEscaped(),

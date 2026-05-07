@@ -13,7 +13,7 @@ echo "Starting traffic event watcher to $HOST:$PORT..." >&2
 while true; do
   # Logread pipes to grep, which pipes to awk
   # awk pipes to tee, which mirrors output to stderr (visible via SSH) and stdout (piped to nc)
-  logread -f | grep dnsmasq | awk -f /root/cybershow_events_v3_json.awk | tee /dev/stderr | nc "$HOST" "$PORT"
+  logread -f | grep dnsmasq | awk -f /root/cybershow_events.awk | tee /dev/stderr | nc "$HOST" "$PORT"
   
   echo "Connection to $HOST:$PORT dropped or logread exited. Reconnecting in 2 seconds..." >&2
   sleep 2
