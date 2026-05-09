@@ -69,6 +69,13 @@
       "date": "2026-05-08T00:52:12",
       "message": "Include awk and oui.txt in release zip",
       "zip": "cybershow-wifi-v09.zip"
+    },
+    {
+      "version": 10,
+      "commit": "4784c3a",
+      "date": "2026-05-09T17:22:56",
+      "message": "Rename release zip prefix to bajo-ataque",
+      "zip": "bajo-ataque-wifi-v10.zip"
     }
   ]
 }
