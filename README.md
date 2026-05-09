@@ -150,7 +150,7 @@ What the script does:
 1. Checks the current `HEAD` commit against the last recorded release
 2. Builds the Release configuration
 3. Stages the executable, Qt runtime files, plugins, and runtime resources
-4. Creates `dist\cybershow-wifi-vNN.zip`
+4. Creates `dist\bajo-ataque-wifi-vNN.zip`
 5. Appends the release entry to `releases.json`
 6. Creates a matching git tag
 

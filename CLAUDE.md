@@ -132,7 +132,7 @@ That script:
 1. checks the current commit against `releases.json`
 2. builds the Release target
 3. stages the executable, Qt runtime, plugins, and runtime resources
-4. creates `dist\cybershow-wifi-vNN.zip`
+4. creates `dist\bajo-ataque-wifi-vNN.zip`
 5. records the release in `releases.json`
 6. creates a matching git tag
 

@@ -62,6 +62,13 @@
       "date": "2026-05-04T18:44:55",
       "message": "Remove setup launch mode",
       "zip": "cybershow-wifi-v08.zip"
+    },
+    {
+      "version": 9,
+      "commit": "664745b",
+      "date": "2026-05-08T00:52:12",
+      "message": "Include awk and oui.txt in release zip",
+      "zip": "cybershow-wifi-v09.zip"
     }
   ]
 }

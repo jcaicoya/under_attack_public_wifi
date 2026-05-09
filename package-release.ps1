@@ -29,7 +29,7 @@ if (-not $Force -and $last -and $last.commit -eq $commitShort) {
 # --- Next version ---
 $versionNum = if ($releases.Count -eq 0) { 0 } else { [int]$last.version + 1 }
 $versionTag = "v{0:D2}" -f $versionNum
-$zipName    = "cybershow-wifi-$versionTag.zip"
+$zipName    = "bajo-ataque-wifi-$versionTag.zip"
 $zipPath    = Join-Path $distDir $zipName
 
 Write-Host ""
