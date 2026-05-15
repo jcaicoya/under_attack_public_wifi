@@ -52,7 +52,7 @@ QString OperationalLog::filePath()
     const QString basePath = QCoreApplication::applicationDirPath().isEmpty()
         ? QDir::currentPath()
         : QCoreApplication::applicationDirPath();
-    return QDir(basePath).filePath(QStringLiteral("logs/public-wifi.log"));
+    return QDir(basePath).filePath(QStringLiteral("logs/under_attack_public_wifi.log"));
 }
 
 void OperationalLog::write(const QString& level, const QString& component, const QString& message)
@@ -69,7 +69,7 @@ void OperationalLog::write(const QString& level, const QString& component, const
 
     QTextStream out(&file);
     out << QDateTime::currentDateTimeUtc().toString(Qt::ISODate)
-        << " | public-wifi | "
+        << " | under_attack_public_wifi | "
         << sanitize(launchModeField())
         << " | "
         << sanitize(profileField())

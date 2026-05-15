@@ -85,7 +85,7 @@ Stdout protocol lines used by the orchestrator:
 Operational log format:
 
 ```text
-timestamp | public-wifi | launchMode | profile | level | component | message
+timestamp | under_attack_public_wifi | launchMode | profile | level | component | message
 ```
 
 The log must not include credential values or raw traffic payloads.

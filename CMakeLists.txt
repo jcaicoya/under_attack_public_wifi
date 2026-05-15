@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(public_wifi)
+project(under_attack_public_wifi)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_AUTOMOC ON)
@@ -17,7 +17,7 @@ find_package(Qt6 COMPONENTS
         Svg
         REQUIRED)
 
-add_executable(public_wifi
+add_executable(under_attack_public_wifi
         src/main.cpp
         src/ShowConfig.h
         src/cybershow/common/CyberAppMode.h
@@ -52,7 +52,7 @@ add_executable(public_wifi
         src/MapView.h
         resources/resources.qrc)
 
-target_link_libraries(public_wifi
+target_link_libraries(under_attack_public_wifi
         Qt::Core
         Qt::Gui
         Qt::Multimedia
@@ -61,14 +61,14 @@ target_link_libraries(public_wifi
         Qt::Svg
 )
 
-target_include_directories(public_wifi PRIVATE
+target_include_directories(under_attack_public_wifi PRIVATE
         src/cybershow/common
         src/cybershow/ui
 )
 
 # Hide the console window in Release builds; keep it in Debug so CLion can stop the process.
 if(WIN32)
-    set_target_properties(public_wifi PROPERTIES
+    set_target_properties(under_attack_public_wifi PROPERTIES
         WIN32_EXECUTABLE "$<CONFIG:Release,RelWithDebInfo>")
 endif()
 

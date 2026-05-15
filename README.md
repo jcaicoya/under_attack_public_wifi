@@ -107,7 +107,7 @@ Demo mode is self-contained:
 - Credential values and raw traffic payloads are not written to the operational log.
 - Runtime launches in live mode by default, or in demo mode with `--demo`.
 - Screen changes and key runtime events are emitted through the Cybershow stdout protocol.
-- Operational logging goes to `logs/public-wifi.log`.
+- Operational logging goes to `logs/under_attack_public_wifi.log`.
 
 ### Resources
 
@@ -133,7 +133,7 @@ Stdout is reserved for `CYBERSHOW_*` orchestration lines where possible:
 Operational logging uses:
 
 ```text
-timestamp | public-wifi | launchMode | profile | level | component | message
+timestamp | under_attack_public_wifi | launchMode | profile | level | component | message
 ```
 
 ## Release Packaging
@@ -150,7 +150,7 @@ What the script does:
 1. Checks the current `HEAD` commit against the last recorded release
 2. Builds the Release configuration
 3. Stages the executable, Qt runtime files, plugins, and runtime resources
-4. Creates `dist\bajo-ataque-wifi-vNN.zip`
+4. Creates `dist\bajo-ataque-under_attack_public_wifi-vNN.zip`
 5. Appends the release entry to `releases.json`
 6. Creates a matching git tag
 

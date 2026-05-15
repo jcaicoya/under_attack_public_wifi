@@ -42,7 +42,7 @@ La contraseña debe estar guardada en la libreta operativa o en el soporte acord
 5. Lanzar la aplicación:
 
 ```powershell
-public_wifi.exe --live --fullscreen
+under_attack_public_wifi.exe --live --fullscreen
 ```
 
 La aplicación debe abrir directamente la ejecución, no la pantalla de configuración.

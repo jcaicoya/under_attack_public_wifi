@@ -195,6 +195,7 @@ static void showMainWindow(MainWindow& window, const ShowConfig& config)
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+    app.setApplicationName(QStringLiteral("under_attack_public_wifi"));
     cybershow::OperationalLog::configure(QStringLiteral("startup"), QStringLiteral("unknown"));
     cybershow::OperationalLog::write(QStringLiteral("INFO"), QStringLiteral("startup"), QStringLiteral("Application process started"));
 
