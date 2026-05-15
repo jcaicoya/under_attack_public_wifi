@@ -180,6 +180,13 @@
       "date": "2026-05-15T16:37:59",
       "message": "Package v10",
       "zip": "bajo-ataque-under_attack_public_wifi-v12.zip"
+    },
+    {
+      "version": 13,
+      "commit": "03a80d6",
+      "date": "2026-05-15T16:49:46",
+      "message": "Align public wifi naming and packaging",
+      "zip": "bajo-ataque-under_attack_public_wifi-v13.zip"
     }
   ]
 }
