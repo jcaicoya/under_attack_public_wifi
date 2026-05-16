@@ -194,6 +194,13 @@
       "date": "2026-05-16T10:40:04",
       "message": "Rename package-release.ps1 to package_release.ps1 (snake_case)",
       "zip": "bajo-ataque-under_attack_public_wifi-v14.zip"
+    },
+    {
+      "version": 15,
+      "commit": "83cd2a8",
+      "date": "2026-05-16T17:36:50",
+      "message": "Store Qt release archives at dist root",
+      "zip": "public_wifi_v15.zip"
     }
   ]
 }
