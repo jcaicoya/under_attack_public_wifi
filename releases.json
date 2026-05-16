@@ -187,6 +187,13 @@
       "date": "2026-05-15T16:49:46",
       "message": "Align public wifi naming and packaging",
       "zip": "bajo-ataque-under_attack_public_wifi-v13.zip"
+    },
+    {
+      "version": 14,
+      "commit": "fb4b66e",
+      "date": "2026-05-16T10:40:04",
+      "message": "Rename package-release.ps1 to package_release.ps1 (snake_case)",
+      "zip": "bajo-ataque-under_attack_public_wifi-v14.zip"
     }
   ]
 }
