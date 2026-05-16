@@ -9,7 +9,7 @@ $workspaceRoot = Split-Path $root -Parent
 $projectName  = Split-Path $root -Leaf
 $buildDir     = Join-Path $root "cmake-build-release"
 $distRoot     = Join-Path $workspaceRoot "dist_qt"
-$distDir      = Join-Path $distRoot $projectName
+$packageDir   = Join-Path $distRoot $projectName
 $releasesFile = Join-Path $root "releases.json"
 $staging      = Join-Path $root "_staging"
 $appName      = "under_attack_public_wifi"
@@ -75,12 +75,12 @@ $alreadyPackaged = $last -and $last.commit -eq $commitShort
 $versionNum = if ($alreadyPackaged) { [int]$last.version } elseif ($releases.Count -eq 0) { 0 } else { [int]$last.version + 1 }
 $versionTag = "v{0:D2}" -f $versionNum
 $zipName    = "bajo-ataque-under_attack_public_wifi-$versionTag.zip"
-$zipPath    = Join-Path $distDir $zipName
-$shouldPublishRelease = $Force -or (-not $alreadyPackaged) -or (-not (Test-Path $distDir))
+$zipPath    = Join-Path $distRoot $zipName
+$shouldPublishRelease = $Force -or (-not $alreadyPackaged) -or (-not (Test-Path $packageDir)) -or (-not (Test-Path $zipPath))
 
 # --- Already packaged? ---
 if (-not $shouldPublishRelease) {
-    Write-Host "Already packaged as $($last.zip) and published to $distDir. Nothing to do."
+    Write-Host "Already packaged as $($last.zip) and published to $packageDir. Nothing to do."
     Write-Host "Use -Force to republish the same commit."
     exit 0
 }
@@ -155,11 +155,11 @@ $metadata | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $staging "version.j
 # --- Zip ---
 Write-Host ">> Creating zip..."
 if (-not (Test-Path $distRoot)) { New-Item -ItemType Directory -Path $distRoot | Out-Null }
-if (Test-Path $distDir) { Remove-Item -LiteralPath $distDir -Recurse -Force }
-New-Item -ItemType Directory -Path $distDir | Out-Null
+if (Test-Path $packageDir) { Remove-Item -LiteralPath $packageDir -Recurse -Force }
+New-Item -ItemType Directory -Path $packageDir | Out-Null
 if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
 Compress-Archive -Path "$staging\*" -DestinationPath $zipPath
-Expand-Archive -LiteralPath $zipPath -DestinationPath $distDir -Force
+Expand-Archive -LiteralPath $zipPath -DestinationPath $packageDir -Force
 Remove-Item $staging -Recurse -Force
 
 # --- Update releases.json ---
@@ -194,5 +194,5 @@ Write-Host "=== Done ==="
 Write-Host "  Version : $versionTag"
 Write-Host "  Commit  : $commitShort - $commitMsg"
 Write-Host "  Zip     : $zipName ($sizeMB MB)"
-Write-Host "  Path    : $distDir"
+Write-Host "  Path    : $packageDir"
 Write-Host ""
