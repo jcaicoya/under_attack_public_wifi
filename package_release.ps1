@@ -5,8 +5,11 @@ param(
 $ErrorActionPreference = "Stop"
 
 $root         = $PSScriptRoot
+$workspaceRoot = Split-Path $root -Parent
+$projectName  = Split-Path $root -Leaf
 $buildDir     = Join-Path $root "cmake-build-release"
-$distDir      = Join-Path $root "dist"
+$distRoot     = Join-Path $workspaceRoot "dist_qt"
+$distDir      = Join-Path $distRoot $projectName
 $releasesFile = Join-Path $root "releases.json"
 $staging      = Join-Path $root "_staging"
 $appName      = "under_attack_public_wifi"
@@ -68,19 +71,19 @@ if ($hasGit) {
 $data     = Get-Content $releasesFile | ConvertFrom-Json
 $releases = @($data.releases)
 $last     = if ($releases.Count -gt 0) { $releases[-1] } else { $null }
-
-# --- Already packaged? ---
-if (-not $Force -and $last -and $last.commit -eq $commitShort) {
-    Write-Host "Already packaged as $($last.zip). Nothing to do."
-    Write-Host "Use -Force to repackage the same commit."
-    exit 0
-}
-
-# --- Next version ---
-$versionNum = if ($releases.Count -eq 0) { 0 } else { [int]$last.version + 1 }
+$alreadyPackaged = $last -and $last.commit -eq $commitShort
+$versionNum = if ($alreadyPackaged) { [int]$last.version } elseif ($releases.Count -eq 0) { 0 } else { [int]$last.version + 1 }
 $versionTag = "v{0:D2}" -f $versionNum
 $zipName    = "bajo-ataque-under_attack_public_wifi-$versionTag.zip"
 $zipPath    = Join-Path $distDir $zipName
+$shouldPublishRelease = $Force -or (-not $alreadyPackaged) -or (-not (Test-Path $distDir))
+
+# --- Already packaged? ---
+if (-not $shouldPublishRelease) {
+    Write-Host "Already packaged as $($last.zip) and published to $distDir. Nothing to do."
+    Write-Host "Use -Force to republish the same commit."
+    exit 0
+}
 
 Write-Host ""
 Write-Host "=== Packaging $versionTag ==="
@@ -151,22 +154,27 @@ $metadata | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $staging "version.j
 
 # --- Zip ---
 Write-Host ">> Creating zip..."
-if (-not (Test-Path $distDir)) { New-Item -ItemType Directory $distDir | Out-Null }
+if (-not (Test-Path $distRoot)) { New-Item -ItemType Directory -Path $distRoot | Out-Null }
+if (Test-Path $distDir) { Remove-Item -LiteralPath $distDir -Recurse -Force }
+New-Item -ItemType Directory -Path $distDir | Out-Null
 if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
 Compress-Archive -Path "$staging\*" -DestinationPath $zipPath
+Expand-Archive -LiteralPath $zipPath -DestinationPath $distDir -Force
 Remove-Item $staging -Recurse -Force
 
 # --- Update releases.json ---
-$entry = [PSCustomObject]@{
-    version = $versionNum
-    commit  = $commitShort
-    date    = $entryDate
-    message = $commitMsg
-    zip     = $zipName
+if (-not $alreadyPackaged) {
+    $entry = [PSCustomObject]@{
+        version = $versionNum
+        commit  = $commitShort
+        date    = $entryDate
+        message = $commitMsg
+        zip     = $zipName
+    }
+    $releases += $entry
+    $data.releases = $releases
+    $data | ConvertTo-Json -Depth 5 | Set-Content $releasesFile -Encoding UTF8
 }
-$releases += $entry
-$data.releases = $releases
-$data | ConvertTo-Json -Depth 5 | Set-Content $releasesFile -Encoding UTF8
 
 # --- Git tag ---
 if ($hasGit) {
@@ -186,5 +194,5 @@ Write-Host "=== Done ==="
 Write-Host "  Version : $versionTag"
 Write-Host "  Commit  : $commitShort - $commitMsg"
 Write-Host "  Zip     : $zipName ($sizeMB MB)"
-Write-Host "  Path    : $zipPath"
+Write-Host "  Path    : $distDir"
 Write-Host ""
