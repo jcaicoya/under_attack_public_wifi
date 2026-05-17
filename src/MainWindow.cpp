@@ -2159,7 +2159,10 @@ void MainWindow::startSshConsole(QProcess*& proc, QTextEdit* console, const QStr
     });
     
     QStringList args;
-    args << "root@192.168.8.1" << command;
+    args << "-o" << "BatchMode=yes"
+         << "-o" << "StrictHostKeyChecking=accept-new"
+         << "-o" << "ConnectTimeout=10"
+         << "root@192.168.8.1" << command;
     proc->start("ssh", args);
 }
 
@@ -2167,8 +2170,14 @@ void MainWindow::startRouterScripts()
 {
     QString localIp = getLocalIpAddress();
     
-    // Kill any detached background zombies from previous sessions or manual runs first
-    QProcess::execute("ssh", QStringList() << "root@192.168.8.1" << "killall traffic_watch.sh device_watch.sh");
+    // Kill any detached background zombies from previous sessions or manual runs first.
+    // startDetached (not execute) so the killall never blocks the main thread.
+    QProcess::startDetached("ssh", QStringList()
+        << "-o" << "BatchMode=yes"
+        << "-o" << "StrictHostKeyChecking=accept-new"
+        << "-o" << "ConnectTimeout=5"
+        << "root@192.168.8.1"
+        << "killall traffic_watch.sh device_watch.sh 2>/dev/null; true");
     
     if (m_console1) m_console1->clear();
     if (m_console2) m_console2->clear();
