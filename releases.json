@@ -208,6 +208,13 @@
       "date": "2026-05-17T11:58:50",
       "message": "Standardize project docs",
       "zip": "public_wifi_v16.zip"
+    },
+    {
+      "version": 17,
+      "commit": "524a7d5",
+      "date": "2026-05-17T17:57:53",
+      "message": "Fix Live mode hang when router is reachable on startup",
+      "zip": "public_wifi_v17.zip"
     }
   ]
 }
