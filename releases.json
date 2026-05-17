@@ -201,6 +201,13 @@
       "date": "2026-05-16T17:36:50",
       "message": "Store Qt release archives at dist root",
       "zip": "public_wifi_v15.zip"
+    },
+    {
+      "version": 16,
+      "commit": "167c476",
+      "date": "2026-05-17T11:58:50",
+      "message": "Standardize project docs",
+      "zip": "public_wifi_v16.zip"
     }
   ]
 }
